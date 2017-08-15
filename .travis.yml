@@ -1,0 +1,27 @@
+language: java
+jdk:
+- oraclejdk8
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+before_deploy:
+- export GRADLE_BUILD_DIR="build/libs"
+- export TAG=$(git describe --abbrev=0 --tags)
+- export MOD_TAG=${TAG#"v"}
+- export RELEASE_PKG_FILE="${GRADLE_BUILD_DIR}/NNpreproc-${MOD_TAG}.jar"
+- echo "deploying $RELEASE_PKG_FILE to GitHub releases"
+- gradle -PprojVersion=$MOD_TAG build
+deploy:
+  provider: releases
+  api_key:
+    secure: GfOsXZNUXq6059m86pCkTiDPDHlpBPnlDApt6orWrtv4fSieBYrrBskZmudPLF0XC+KSuWAvKNgEGMcvmUn83TuvyanwWcXAdUTqzFDPt+fO9QL5pxhFM1B5Km+WwH9kzjew3WMrQKJe57lw+DsP36ZCtOaSHU+okwjxEaoS858iYgZRkwwMIDrj1rxj1djTupMtt+6+L4MfHkTottHxym4CMpR1V8dWn4nJtc9V19KHuNggCaAOLb2Q4bGpLzQjU9x8tJ2veG4+5SYEWJ/BSBYjEVZUqBfhDcZq9RP5MU8YQ9BJ0TdY54oCpcOSQ0CFwIdm/+7AEot8RaQ3I0qP3mWflZXCFM/swcG0HGkMd0lE3wBhZ2c4GEbdwHM93rT7cYXiF3vEZ29ER7ClZbkXpL6uxj43imHUVgetRlPRObFHd/oqU9xhEwPyAvyi2iTNcRwiS/GBeiMtrSAz3rSz/vFD4/jw7NJHd+FTF5RSIZut+k+qITiAe60StrH9u85zSsrC0t5PHUiMfzrsuNwQygNSydg2kzq52qpln9mPeLmAcski2/U4nviI/QEOhrp4/tY5MNFWwlRX8TXuaXbXOOJq7FmSQU1TDcw9US68YbHqBdLsPa4YbKA3p6FlJTQZyuRMfenWRpHc3/8n4NQbNsp2jHRMyQWr4Q8c8s+xLWA=
+  file: "${RELEASE_PKG_FILE}"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    repo: sidereus3/NNpreproc
